@@ -187,9 +187,26 @@ UInt8 MenuFormHandleEvent(EventPtr e)
 {
 	if (e->eType == ctlSelectEvent)
 	{
-		if (e->data.ctlSelect.controlID == ButtonPlay)
+		switch (e->data.ctlSelect.controlID)
 		{
+		case ButtonPlay:
 			FrmGotoForm(FormPlay);
+			return true;
+		case ButtonHowto:
+			FrmGotoForm(FormHowto);
+			return true;
+		}
+	}
+	return false;
+}
+
+UInt8 HowtoFormHandleEvent(EventPtr e)
+{
+	if (e->eType == ctlSelectEvent)
+	{
+		if (e->data.ctlSelect.controlID == ButtonBack)
+		{
+			FrmGotoForm(FormMenu);
 			return true;
 		}
 	}
@@ -348,6 +365,9 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 					createScreenBuffer();
 					CreateGemBuffer();
 					FrmSetEventHandler(pfrm, PlayFormHandleEvent);
+					break;
+				case FormHowto:
+					FrmSetEventHandler(pfrm, HowtoFormHandleEvent);
 					break;
 				}
 				break;

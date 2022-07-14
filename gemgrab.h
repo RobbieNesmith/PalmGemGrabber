@@ -2,6 +2,7 @@
 #define FormPlay 1010
 #define FormGameOver 1020
 #define FormScores 1030
+#define FormHowto 1040
 
 #define Ok 9999
 
@@ -18,3 +19,4 @@
 #define ButtonPlay 3000
 #define ButtonScores 3010
 #define ButtonHowto 3020
+#define ButtonBack 3030

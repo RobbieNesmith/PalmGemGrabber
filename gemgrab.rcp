@@ -19,6 +19,22 @@ BEGIN
 	TITLE "Gem Grabber"
 END
 
+FORM ID FormHowto AT (0 0 160 160)
+USABLE
+HELPID Help1
+BEGIN
+	TITLE "Gem Grabber"
+	LABEL "How to Play GemGrabber" AUTOID AT (CENTER 24) FONT 2
+	LABEL "Grab gems by tapping the screen" AUTOID AT (CENTER PREVBOTTOM + 4)
+	LABEL "when the claw is pointing in the" AUTOID AT (CENTER PREVBOTTOM + 2)
+	LABEL "right direction. The claw" AUTOID AT (CENTER PREVBOTTOM + 2)
+	LABEL "automatically moves back and forth." AUTOID AT (CENTER PREVBOTTOM + 2)
+	LABEL "Larger gems are worth more points" AUTOID AT (CENTER PREVBOTTOM + 2)
+	LABEL "but are heavier and take longer to" AUTOID AT (CENTER PREVBOTTOM + 2)
+	LABEL "retrieve." AUTOID AT (CENTER PREVBOTTOM + 2)
+	BUTTON "Back" ID ButtonBack AT (CENTER 140 120 AUTO)
+END
+
 STRING Help1 "This is the mobile version of the programming classics \"Hello World\".\n"\
     "-----------\n" \
 	"Eric Poncet\n"\
