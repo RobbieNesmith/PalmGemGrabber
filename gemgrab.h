@@ -13,3 +13,8 @@
 #define Gem6 1006
 #define Gem7 1007
 #define Gem8 1008
+#define BitmapTitle 2001
+
+#define ButtonPlay 3000
+#define ButtonScores 3010
+#define ButtonHowto 3020

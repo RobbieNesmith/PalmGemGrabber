@@ -183,7 +183,20 @@ void GrabGem(UInt8 index)
 	heldGemIndex = -1;
 }
 
-UInt8 MainFormHandleEvent(EventPtr e)
+UInt8 MenuFormHandleEvent(EventPtr e)
+{
+	if (e->eType == ctlSelectEvent)
+	{
+		if (e->data.ctlSelect.controlID == ButtonPlay)
+		{
+			FrmGotoForm(FormPlay);
+			return true;
+		}
+	}
+	return false;
+}
+
+UInt8 PlayFormHandleEvent(EventPtr e)
 {
 	RectangleType rect;
 	RectangleType heldGemRect;
@@ -299,10 +312,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 		ErrFatalDisplayIf(err, "Can't open MathLib");
 
 		FrmGotoForm(FormMenu);
-		createScreenBuffer();
-		CreateGemBuffer();
 		SetUpBitmaps();
-		SetUpGems();
 
 		lastTicks = TimGetTicks();
 		nextTickCount = TimGetTicks() + INTERVAL;
@@ -329,16 +339,27 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 			case frmLoadEvent:
 				pfrm = FrmInitForm(e.data.frmLoad.formID);
 				FrmSetActiveForm(pfrm);
-				FrmSetEventHandler(pfrm, MainFormHandleEvent);
+				switch (e.data.frmLoad.formID)
+				{
+				case FormMenu:
+					FrmSetEventHandler(pfrm, MenuFormHandleEvent);
+					break;
+				case FormPlay:
+					createScreenBuffer();
+					CreateGemBuffer();
+					FrmSetEventHandler(pfrm, PlayFormHandleEvent);
+					break;
+				}
 				break;
 
 			case frmOpenEvent:
 				pfrm = FrmGetActiveForm();
 				FrmDrawForm(pfrm);
-				startDrawOffscreen();
-				RenderGems();
-				endDrawOffscreen();
-				flipDisplay();
+				if (e.data.frmOpen.formID == FormPlay)
+				{
+					SetUpGems();
+					RenderGems();
+				}
 				break;
 
 			case menuEvent:

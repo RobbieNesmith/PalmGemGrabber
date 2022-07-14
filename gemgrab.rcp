@@ -5,6 +5,18 @@ USABLE
 HELPID Help1
 BEGIN
 	TITLE "Gem Grabber"
+	FORMBITMAP AT (24 24) BITMAP BitmapTitle
+	BUTTON "Play" ID ButtonPlay AT (CENTER 96 120 AUTO)
+	BUTTON "High Scores" ID ButtonScores AT (CENTER PREVBOTTOM + 4 120 AUTO)
+	BUTTON "How to Play" ID ButtonHowto AT (CENTER PREVBOTTOM + 4 120 AUTO)
+	LABEL "bobberto1995 - 2022" AUTOID AT (CENTER PREVBOTTOM + 4)
+END
+
+FORM ID FormPlay AT (0 0 160 160)
+USABLE
+HELPID Help1
+BEGIN
+	TITLE "Gem Grabber"
 END
 
 STRING Help1 "This is the mobile version of the programming classics \"Hello World\".\n"\
@@ -16,6 +28,11 @@ STRING Help1 "This is the mobile version of the programming classics \"Hello Wor
 ICON "gemgrab.bmp"
 
 SMALLICON "gemgrabsmall.bmp"
+
+BITMAPFAMILYEX ID BitmapTitle
+BEGIN
+BITMAP "title.bmp" BPP 1 DENSITY 1
+END
 
 BITMAPFAMILYEX ID Gem4
 BEGIN
