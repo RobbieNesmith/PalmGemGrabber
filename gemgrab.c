@@ -23,13 +23,14 @@ UInt32 swingTimer = 0;
 double swingPosition;
 double swingX;
 double swingY;
-UInt16 extendAmount = 0;
+double extendAmount = 0.0;
 Boolean extending = false;
-double baseExtendSpeed = 60;
-double extendSpeed = 1;
+double baseExtendSpeed = 60.0;
+double extendSpeed = 1.0;
 UInt8 numGems = NUM_GEMS;
 GemType gems[NUM_GEMS];
 int heldGemIndex = -1;
+int lastTicks;
 
 UInt16 score = 0;
 UInt8 time = STARTING_TIME + 3;
@@ -150,6 +151,9 @@ UInt8 MainFormHandleEvent(EventPtr e)
 	RectangleType rect;
 	RectangleType heldGemRect;
 	UInt8 i;
+	UInt32 curTicks = TimGetTicks();
+	double delta = (curTicks - lastTicks) / (sysTicksPerSecond * 1.0);
+	lastTicks = curTicks;
 
 	rect.extent.x = 8,
 	rect.extent.y = 8;
@@ -184,7 +188,7 @@ UInt8 MainFormHandleEvent(EventPtr e)
 		{
 			if (extending)
 			{
-				extendAmount++;
+				extendAmount += baseExtendSpeed * extendSpeed * delta;
 				if (swingX < 0 || swingX >= 160 || swingY >= 144)
 				{
 					extending = false;
@@ -195,12 +199,18 @@ UInt8 MainFormHandleEvent(EventPtr e)
 					{
 						heldGemIndex = i;
 						extending = false;
+						extendSpeed = 4.0 / (gems[heldGemIndex].size / 10);
 					}
 				}
 			}
 			else
 			{
-				extendAmount--;
+				extendAmount -= baseExtendSpeed * extendSpeed * delta;
+				if (extendAmount < 0)
+				{
+					extendSpeed = 1.0;
+					extendAmount = 0;
+				}
 			}
 		}
 		swingX = floor((16.0 + extendAmount) * cos(swingPosition)) + 80;
@@ -251,6 +261,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 		SetUpBitmaps();
 		SetUpGems();
 
+		lastTicks = TimGetTicks();
 		nextTickCount = TimGetTicks() + INTERVAL;
 
 		while (1)
