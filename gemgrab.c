@@ -30,7 +30,7 @@ double extendSpeed = 1.0;
 UInt8 numGems = NUM_GEMS;
 GemType gems[NUM_GEMS];
 int heldGemIndex = -1;
-int lastTicks;
+UInt32 lastTicks;
 
 UInt16 score = 0;
 UInt8 time = STARTING_TIME + 3;
