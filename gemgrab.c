@@ -196,8 +196,9 @@ UInt8 MainFormHandleEvent(EventPtr e)
 	rect.extent.y = 8;
 
 	startDrawOffscreen();
-	if (e->eType == nilEvent)
+	switch (e->eType)
 	{
+	case nilEvent:
 		DrawGemBuffer();
 		rect.topLeft.x = swingX - 4;
 		rect.topLeft.y = swingY - 4;
@@ -262,15 +263,17 @@ UInt8 MainFormHandleEvent(EventPtr e)
 		{
 			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], rect.topLeft.x + (8 - heldGemRect.extent.x) / 2, rect.topLeft.y + 8);
 		}
-	}
-	else if (e->eType == penDownEvent)
-	{
+		break;
+	case penDownEvent:
 		// toggle extending if not extending
 		if (extendAmount == 0)
 		{
 			extendAmount = 1;
 			extending = true;
 		}
+		break;
+	default:
+		break;
 	}
 	endDrawOffscreen();
 	flipDisplay();
