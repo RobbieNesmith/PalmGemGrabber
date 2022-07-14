@@ -1,0 +1,29 @@
+#include "gemgrab.h"
+
+FORM ID FormMenu AT (0 0 160 160)
+USABLE
+HELPID Help1
+BEGIN
+	TITLE "Gem Grabber"
+END
+
+STRING Help1 "This is the mobile version of the programming classics \"Hello World\".\n"\
+    "-----------\n" \
+	"Eric Poncet\n"\
+	"mobile.eric-poncet.com\n"\
+	"Freeware"
+
+ICON "gemgrab.bmp"
+
+SMALLICON "gemgrabsmall.bmp"
+
+BITMAP ID 2005 "gemgrab.bmp" 
+BITMAP ID Gem4 "gem4.bmp" 
+BITMAP ID Gem5 "gem5.bmp" 
+BITMAP ID Gem6 "gem6.bmp" 
+BITMAP ID Gem7 "gem7.bmp" 
+BITMAP ID Gem8 "gem8.bmp"
+
+VERSION 1 "1.0.0"
+
+LAUNCHERCATEGORY ID 1000 "Games"
