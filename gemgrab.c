@@ -39,6 +39,8 @@ Boolean gameOver = false;
 
 BitmapPtr gemBitmaps[5];
 
+WinHandle gemBuffer;
+
 // Double buffering code from Noiz
 
 WinHandle screenBufferH;
@@ -86,6 +88,12 @@ void flipDisplay()
 
 // End double buffering code from Noiz
 
+void CreateGemBuffer()
+{
+	UInt16 error;
+	gemBuffer = WinCreateOffscreenWindow(160, 144, screenFormat, &error);
+}
+
 void SetUpBitmaps()
 {
 	MemHandle gem4Handle = DmGetResource(bitmapRsc, Gem4);
@@ -127,12 +135,41 @@ void SetUpGems()
 void RenderGems()
 {
 	int i = 0;
+	WinHandle tempDrawWindow = WinGetDrawWindow();
+	WinSetDrawWindow(gemBuffer);
 
 	for (i = 0; i < NUM_GEMS; i++)
 	{
 		int gemSize = gems[i].size / 10;
 		WinDrawBitmap(gemBitmaps[gemSize - 4], gems[i].x - gemSize / 2, gems[i].y - gemSize / 2);
 	}
+
+	WinSetDrawWindow(tempDrawWindow);
+}
+
+void EraseGem(index)
+{
+	WinHandle tempDrawWindow = WinGetDrawWindow();
+	RectangleType gemRect;
+	UInt8 gemSize = gems[index].size / 10;
+	gemRect.topLeft.x = gems[index].x - gemSize / 2;
+	gemRect.topLeft.y = gems[index].y - gemSize / 2;
+	gemRect.extent.x = gemSize;
+	gemRect.extent.y = gemSize;
+
+	WinSetDrawWindow(gemBuffer);
+	WinEraseRectangle(&gemRect, 0);
+	WinSetDrawWindow(tempDrawWindow);
+}
+
+void DrawGemBuffer()
+{
+	RectangleType sourceBounds;
+	sourceBounds.topLeft.x = 0;
+	sourceBounds.topLeft.y = 0;
+	sourceBounds.extent.x = 160;
+	sourceBounds.extent.y = 144;
+	WinCopyRectangle(gemBuffer, 0, &sourceBounds, 0, 0, winPaint);
 }
 
 void GrabGem(UInt8 index)
@@ -161,6 +198,7 @@ UInt8 MainFormHandleEvent(EventPtr e)
 	startDrawOffscreen();
 	if (e->eType == nilEvent)
 	{
+		DrawGemBuffer();
 		rect.topLeft.x = swingX - 4;
 		rect.topLeft.y = swingY - 4;
 		WinEraseRectangle(&rect, 0);
@@ -200,6 +238,7 @@ UInt8 MainFormHandleEvent(EventPtr e)
 						heldGemIndex = i;
 						extending = false;
 						extendSpeed = 4.0 / (gems[heldGemIndex].size / 10);
+						EraseGem(heldGemIndex);
 					}
 				}
 			}
@@ -258,6 +297,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 
 		FrmGotoForm(FormMenu);
 		createScreenBuffer();
+		CreateGemBuffer();
 		SetUpBitmaps();
 		SetUpGems();
 
