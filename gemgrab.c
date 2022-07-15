@@ -5,7 +5,7 @@
 #include "gemgrab.h"
 
 #define INTERVAL 5
-#define STARTING_TIME 60
+#define STARTING_TIME 60 * sysTicksPerSecond
 #define NUM_GEMS 20
 
 #define QUARTER_PI 0.78540
@@ -33,7 +33,7 @@ int heldGemIndex = -1;
 UInt32 lastTicks;
 
 UInt16 score = 0;
-UInt8 time = STARTING_TIME + 3;
+UInt16 time = STARTING_TIME + 3 * sysTicksPerSecond;
 
 Boolean gameOver = false;
 
@@ -175,6 +175,7 @@ void DrawGemBuffer()
 void GrabGem(UInt8 index)
 {
 	int i;
+	score += gems[index].size;
 	for (i = index; i < numGems - 1; i++)
 	{
 		gems[i] = gems[i + 1];
@@ -220,9 +221,20 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 	UInt8 i;
 	UInt32 curTicks = TimGetTicks();
 	double delta = (curTicks - lastTicks) / (sysTicksPerSecond * 1.0);
+	Char timeString[3];
+	Char scoreString[5];
+
+	if (time > curTicks - lastTicks)
+	{
+		time -= curTicks - lastTicks;
+	}
+	else
+	{
+		time = 0;
+	}
 	lastTicks = curTicks;
 
-	rect.extent.x = 8,
+	rect.extent.x = 8;
 	rect.extent.y = 8;
 
 	startDrawOffscreen();
@@ -241,6 +253,12 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 			heldGemRect.topLeft.y = rect.topLeft.y + 8;
 			WinEraseRectangle(&heldGemRect, 0);
 		}
+
+		StrIToA(timeString, time / sysTicksPerSecond);
+		StrIToA(scoreString, score);
+
+		WinDrawChars(timeString, StrLen(timeString), 0, 0);
+		WinDrawChars(scoreString, StrLen(scoreString), 140, 0);
 
 		if (extendAmount == 0)
 		{
