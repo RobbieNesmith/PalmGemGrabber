@@ -20,3 +20,6 @@
 #define ButtonScores 3010
 #define ButtonHowto 3020
 #define ButtonBack 3030
+
+#define LabelScore 4000
+#define FieldHighScoreName 4010

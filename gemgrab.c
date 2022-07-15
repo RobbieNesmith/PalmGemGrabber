@@ -33,7 +33,7 @@ int heldGemIndex = -1;
 UInt32 lastTicks;
 
 UInt16 score = 0;
-UInt16 time = STARTING_TIME + 3 * sysTicksPerSecond;
+UInt16 time;
 
 Boolean gameOver = false;
 
@@ -214,6 +214,19 @@ UInt8 HowtoFormHandleEvent(EventPtr e)
 	return false;
 }
 
+UInt8 GameOverFormHandleEvent(EventPtr e)
+{
+	if (e->eType == ctlSelectEvent)
+	{
+		if (e->data.ctlSelect.controlID == ButtonBack)
+		{
+			FrmGotoForm(FormMenu);
+			return true;
+		}
+	}
+	return false;
+}
+
 UInt8 PlayFormHandleEvent(EventPtr e)
 {
 	RectangleType rect;
@@ -231,6 +244,7 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 	else
 	{
 		time = 0;
+		FrmGotoForm(FormGameOver);
 	}
 	lastTicks = curTicks;
 
@@ -336,6 +350,9 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 	UInt16 useCount;
 	long nextTickCount, tickCount;
 	int intervalRemaining;
+	UInt16 scoreLabelIndex;
+	MemPtr scoreLabelPointer;
+	Char scoreString[5];
 
 	if (cmd == sysAppLaunchCmdNormalLaunch) // Make sure only react to NormalLaunch, not Reset, Beam, Find, GoTo...
 	{
@@ -349,7 +366,6 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 		FrmGotoForm(FormMenu);
 		SetUpBitmaps();
 
-		lastTicks = TimGetTicks();
 		nextTickCount = TimGetTicks() + INTERVAL;
 
 		while (1)
@@ -382,10 +398,18 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 				case FormPlay:
 					createScreenBuffer();
 					CreateGemBuffer();
+					lastTicks = TimGetTicks();
+					time = STARTING_TIME + 3 * sysTicksPerSecond;
 					FrmSetEventHandler(pfrm, PlayFormHandleEvent);
 					break;
 				case FormHowto:
 					FrmSetEventHandler(pfrm, HowtoFormHandleEvent);
+					break;
+				case FormGameOver:
+					scoreLabelIndex = FrmGetObjectIndex(pfrm, LabelScore);
+					scoreLabelPointer = FrmGetObjectPtr(pfrm, scoreLabelIndex);
+					CtlSetLabel(scoreLabelPointer, StrIToA(scoreString, score));
+					FrmSetEventHandler(pfrm, GameOverFormHandleEvent);
 					break;
 				}
 				break;

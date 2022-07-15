@@ -35,6 +35,20 @@ BEGIN
 	BUTTON "Back" ID ButtonBack AT (CENTER 140 120 AUTO)
 END
 
+FORM ID FormGameOver AT (0 0 160 160)
+USABLE
+HELPID Help1
+BEGIN
+	TITLE "GemGrabber"
+	LABEL "Game Over" AUTOID AT (CENTER 24) FONT 2
+	LABEL "Your score is" AUTOID AT (CENTER PREVBOTTOM + 4)
+	LABEL "blerg" ID LabelScore AT (CENTER PREVBOTTOM + 2) FONT 2
+	LABEL "Enter your name to save your score!" AUTOID AT (CENTER PREVBOTTOM + 2)
+	FIELD ID FieldHighScoreName AT (CENTER PREVBOTTOM + 2 120 AUTO) USABLE UNDERLINED MAXCHARS 20
+	BUTTON "Save" ID ButtonBack AT (CENTER 140 120 AUTO)
+END
+
+
 STRING Help1 "This is the mobile version of the programming classics \"Hello World\".\n"\
     "-----------\n" \
 	"Eric Poncet\n"\
