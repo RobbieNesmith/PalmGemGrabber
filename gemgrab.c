@@ -4,6 +4,10 @@
 
 #include "gemgrab.h"
 
+#define CREATOR_ID 'rngg'
+#define DB_NAME "GemGrabberDB"
+#define DB_TYPE 'DATA'
+
 #define INTERVAL 5
 #define STARTING_TIME 60 * sysTicksPerSecond
 #define NUM_GEMS 20
@@ -18,6 +22,19 @@ typedef struct GemType
 	Coord y;
 	UInt8 size;
 } GemType;
+
+typedef struct HighScoreType
+{
+	Char name[21];
+	UInt16 score;
+} HighScoreType;
+
+typedef struct DbRecordType
+{
+	HighScoreType scores[10];
+	UInt8 numScores;
+} DbRecordType;
+typedef DbRecordType *DbRecordTypePtr;
 
 UInt32 swingTimer = 0;
 double swingPosition;
@@ -34,6 +51,11 @@ UInt32 lastTicks;
 
 UInt16 score = 0;
 UInt16 time;
+
+DmOpenRef db;
+UInt16 dbCard;
+LocalID dbId;
+DbRecordType highScores;
 
 Boolean gameOver = false;
 
@@ -87,6 +109,91 @@ void flipDisplay()
 }
 
 // End double buffering code from Noiz
+
+void SelectRecord(UInt16 index)
+{
+	MemHandle recordHandle;
+	DbRecordTypePtr recordPointer;
+	int i;
+
+	if ((recordHandle = (MemHandle)DmQueryRecord(db, index)))
+	{
+		if (DmRecordInfo(db, index, NULL, NULL, NULL))
+		{
+			FrmCustomAlert(ErrorAlert, "Unable to get record info", "", "");
+			return;
+		}
+		recordPointer = (DbRecordTypePtr)MemHandleLock(recordHandle);
+
+		for (i = 0; i < recordPointer->numScores; i++)
+		{
+			highScores.scores[i].score = recordPointer->scores[i].score;
+			StrCopy(highScores.scores[i].name, recordPointer->scores[i].name);
+		}
+		highScores.numScores = recordPointer->numScores;
+
+		MemHandleUnlock(recordHandle);
+	}
+}
+
+void InsertRecord()
+{
+	UInt16 index;
+	MemHandle recordHandle;
+	MemPtr recordPointer;
+
+	index = DmNumRecords(db);
+	if (!(recordHandle = DmNewRecord(db, &index, sizeof(DbRecordType))))
+	{
+		FrmCustomAlert(ErrorAlert, "Unable to create record", "", "");
+		return;
+	}
+
+	recordPointer = MemHandleLock(recordHandle);
+	DmWrite(recordPointer, 0, &highScores, sizeof(DbRecordType));
+	MemPtrUnlock(recordPointer);
+
+	DmReleaseRecord(db, index, true);
+}
+
+void UpdateRecord()
+{
+	UInt16 index = 0;
+	MemHandle recordHandle;
+	MemPtr recordPointer;
+
+	if (DmRecordInfo(db, index, NULL, NULL, NULL))
+	{
+		FrmCustomAlert(ErrorAlert, "Unable to get record info", "", "");
+		return;
+	}
+
+	if ((recordHandle = (MemHandle)DmGetRecord(db, index)))
+	{
+		recordPointer = MemHandleLock(recordHandle);
+		DmWrite(recordPointer, 0, &highScores, sizeof(DbRecordType));
+		MemPtrUnlock(recordPointer);
+
+		DmReleaseRecord(db, index, true);
+	}
+	else
+	{
+		FrmCustomAlert(ErrorAlert, "Unable to get record", "", "");
+	}
+}
+
+void UpsertRecord()
+{
+	UInt16 index = DmNumRecords(db);
+	if (index > 0)
+	{
+		UpdateRecord();
+	}
+	else
+	{
+		InsertRecord();
+	}
+}
 
 void CreateGemBuffer()
 {
@@ -194,11 +301,37 @@ void GrabGem(UInt8 index)
 	RenderGems();
 }
 
-void InitialSetup()
+Err InitialSetup()
 {
+	UInt16 attributes;
+	Err retcode = 0;
+
+	if ((db = DmOpenDatabaseByTypeCreator(DB_TYPE, CREATOR_ID, dmModeReadWrite | dmModeShowSecret)))
+	{
+		DmOpenDatabaseInfo(db, &dbId, NULL, NULL, &dbCard, NULL);
+	}
+	else
+	{
+		if ((retcode = DmCreateDatabase(0, DB_NAME, CREATOR_ID, DB_TYPE, false)))
+		{
+			return retcode;
+		}
+
+		if (!(db = DmOpenDatabaseByTypeCreator(DB_TYPE, CREATOR_ID, dmModeReadWrite | dmModeShowSecret)))
+		{
+			return dmErrCantOpen;
+		}
+
+		DmOpenDatabaseInfo(db, &dbId, NULL, NULL, &dbCard, NULL);
+		DmDatabaseInfo(dbCard, dbId, NULL, &attributes, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+		DmSetDatabaseInfo(dbCard, dbId, NULL, &attributes, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	}
+
 	SetUpBitmaps();
 	createScreenBuffer();
 	CreateGemBuffer();
+
+	return retcode;
 }
 
 void ResetGame()
@@ -376,6 +509,7 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 {
 	short err;
+	Err retcode;
 	EventType e;
 	FormType *pfrm;
 	UInt16 useCount;
@@ -395,7 +529,10 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 		ErrFatalDisplayIf(err, "Can't open MathLib");
 
 		FrmGotoForm(FormMenu);
-		InitialSetup();
+		if ((retcode = InitialSetup()) != 0)
+		{
+			return retcode;
+		}
 
 		nextTickCount = TimGetTicks() + INTERVAL;
 
@@ -481,6 +618,8 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 		}
 		TearDownBitmaps();
 		FrmCloseAllForms();
+
+		DmCloseDatabase(db);
 	}
 
 	return 0;

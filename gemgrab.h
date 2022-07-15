@@ -6,7 +6,7 @@
 
 #define Ok 9999
 
-#define Alert1 1000
+#define ErrorAlert 1000
 #define Help1 1000
 
 #define Gem4 1004
