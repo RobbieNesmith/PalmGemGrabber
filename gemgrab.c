@@ -136,7 +136,16 @@ void RenderGems()
 {
 	int i = 0;
 	WinHandle tempDrawWindow = WinGetDrawWindow();
+	RectangleType eraseRect;
+
+	eraseRect.topLeft.x = 0;
+	eraseRect.topLeft.y = 0;
+	eraseRect.extent.x = 160;
+	eraseRect.extent.y = 144;
+
 	WinSetDrawWindow(gemBuffer);
+
+	WinEraseRectangle(&eraseRect, 0);
 
 	for (i = 0; i < NUM_GEMS; i++)
 	{
@@ -182,6 +191,24 @@ void GrabGem(UInt8 index)
 	}
 	numGems--;
 	heldGemIndex = -1;
+	RenderGems();
+}
+
+void InitialSetup()
+{
+	SetUpBitmaps();
+	createScreenBuffer();
+	CreateGemBuffer();
+}
+
+void ResetGame()
+{
+	lastTicks = TimGetTicks();
+	time = STARTING_TIME + 3 * sysTicksPerSecond;
+	extending = false;
+	extendAmount = 0.0;
+	heldGemIndex = -1;
+	score = 0;
 }
 
 UInt8 MenuFormHandleEvent(EventPtr e)
@@ -244,7 +271,6 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 	else
 	{
 		time = 0;
-		FrmGotoForm(FormGameOver);
 	}
 	lastTicks = curTicks;
 
@@ -280,6 +306,11 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 			if (heldGemIndex > -1)
 			{
 				GrabGem(heldGemIndex);
+			}
+
+			if (time == 0)
+			{
+				FrmGotoForm(FormGameOver);
 			}
 
 			swingTimer++;
@@ -364,7 +395,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 		ErrFatalDisplayIf(err, "Can't open MathLib");
 
 		FrmGotoForm(FormMenu);
-		SetUpBitmaps();
+		InitialSetup();
 
 		nextTickCount = TimGetTicks() + INTERVAL;
 
@@ -396,10 +427,7 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 					FrmSetEventHandler(pfrm, MenuFormHandleEvent);
 					break;
 				case FormPlay:
-					createScreenBuffer();
-					CreateGemBuffer();
-					lastTicks = TimGetTicks();
-					time = STARTING_TIME + 3 * sysTicksPerSecond;
+					ResetGame();
 					FrmSetEventHandler(pfrm, PlayFormHandleEvent);
 					break;
 				case FormHowto:
