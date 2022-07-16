@@ -61,6 +61,7 @@ DbRecordType highScores;
 Boolean gameOver = false;
 
 BitmapPtr gemBitmaps[5];
+BitmapPtr countdownBitmaps[3];
 
 WinHandle gemBuffer;
 
@@ -208,11 +209,19 @@ void CreateGemBuffer()
 
 void SetUpBitmaps()
 {
+	MemHandle countdown1Handle = DmGetResource(bitmapRsc, Countdown1);
+	MemHandle countdown2Handle = DmGetResource(bitmapRsc, Countdown2);
+	MemHandle countdown3Handle = DmGetResource(bitmapRsc, Countdown3);
+
 	MemHandle gem4Handle = DmGetResource(bitmapRsc, Gem4);
 	MemHandle gem5Handle = DmGetResource(bitmapRsc, Gem5);
 	MemHandle gem6Handle = DmGetResource(bitmapRsc, Gem6);
 	MemHandle gem7Handle = DmGetResource(bitmapRsc, Gem7);
 	MemHandle gem8Handle = DmGetResource(bitmapRsc, Gem8);
+
+	countdownBitmaps[0] = MemHandleLock(countdown1Handle);
+	countdownBitmaps[1] = MemHandleLock(countdown2Handle);
+	countdownBitmaps[2] = MemHandleLock(countdown3Handle);
 
 	gemBitmaps[0] = MemHandleLock(gem4Handle);
 	gemBitmaps[1] = MemHandleLock(gem5Handle);
@@ -225,6 +234,14 @@ void TearDownBitmaps()
 {
 	int i;
 	MemHandle handle;
+
+	for (i = 0; i < 3; i++)
+	{
+		handle = MemPtrRecoverHandle(countdownBitmaps[i]);
+		MemHandleUnlock(handle);
+		DmReleaseResource(handle);
+	}
+
 	for (i = 0; i < 5; i++)
 	{
 		handle = MemPtrRecoverHandle(gemBitmaps[i]);
@@ -565,9 +582,15 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		{
 			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], rect.topLeft.x + (8 - heldGemRect.extent.x) / 2, rect.topLeft.y + 8);
 		}
+
+		if (time > STARTING_TIME)
+		{
+			WinDrawBitmap(countdownBitmaps[(time - STARTING_TIME) / sysTicksPerSecond], 64, 64);
+		}
+
 		break;
 	case penDownEvent:
-		if (extendAmount == 0 && heldGemIndex == -1)
+		if (extendAmount == 0 && heldGemIndex == -1 && time < STARTING_TIME)
 		{
 			extendAmount = 1;
 			extending = true;

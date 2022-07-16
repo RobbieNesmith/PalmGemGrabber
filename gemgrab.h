@@ -15,6 +15,9 @@
 #define Gem7 1007
 #define Gem8 1008
 #define BitmapTitle 2001
+#define Countdown1 3001
+#define Countdown2 3002
+#define Countdown3 3003
 
 #define ButtonPlay 3000
 #define ButtonScores 3010
