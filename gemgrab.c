@@ -11,6 +11,7 @@
 #define INTERVAL 5
 #define STARTING_TIME 60 * sysTicksPerSecond
 #define NUM_GEMS 20
+#define NUM_HIGHSCORES 8
 
 #define QUARTER_PI 0.78540
 #define HALF_PI 1.57080
@@ -31,7 +32,7 @@ typedef struct HighScoreType
 
 typedef struct DbRecordType
 {
-	HighScoreType scores[10];
+	HighScoreType scores[NUM_HIGHSCORES];
 	UInt8 numScores;
 } DbRecordType;
 typedef DbRecordType *DbRecordTypePtr;
@@ -133,6 +134,10 @@ void SelectRecord(UInt16 index)
 		highScores.numScores = recordPointer->numScores;
 
 		MemHandleUnlock(recordHandle);
+	}
+	else
+	{
+		highScores.numScores = 0;
 	}
 }
 
@@ -356,6 +361,9 @@ UInt8 MenuFormHandleEvent(EventPtr e)
 		case ButtonHowto:
 			FrmGotoForm(FormHowto);
 			return true;
+		case ButtonScores:
+			FrmGotoForm(FormScores);
+			return true;
 		}
 	}
 	return false;
@@ -376,6 +384,61 @@ UInt8 HowtoFormHandleEvent(EventPtr e)
 
 UInt8 GameOverFormHandleEvent(EventPtr e)
 {
+	Int16 i;
+	Char *name;
+	FormType *pfrm;
+	FieldType *pfld;
+	UInt16 objectIndex;
+
+	if (e->eType == ctlSelectEvent)
+	{
+		if (e->data.ctlSelect.controlID == ButtonSave)
+		{
+			pfrm = FrmGetActiveForm();
+			objectIndex = FrmGetObjectIndex(pfrm, FieldHighScoreName);
+			pfld = FrmGetObjectPtr(pfrm, objectIndex);
+			name = FldGetTextPtr(pfld);
+			SelectRecord(0);
+			if (highScores.numScores == 0)
+			{
+				StrNCopy(highScores.scores[0].name, name, 20);
+				highScores.scores[0].score = score;
+			}
+			for (i = highScores.numScores - 1; i >= 0; i--)
+			{
+				if (score < highScores.scores[i].score)
+				{
+					if (i < NUM_HIGHSCORES - 1)
+					{
+						StrNCopy(highScores.scores[i + 1].name, name, 20);
+						highScores.scores[i + 1].score = score;
+					}
+					break;
+				}
+				if (i < NUM_HIGHSCORES - 1)
+				{
+					highScores.scores[i + 1] = highScores.scores[i];
+					if (i == 0)
+					{
+						StrNCopy(highScores.scores[0].name, name, 20);
+						highScores.scores[0].score = score;
+					}
+				}
+			}
+			if (highScores.numScores < NUM_HIGHSCORES)
+			{
+				highScores.numScores++;
+			}
+			UpsertRecord();
+			FrmGotoForm(FormScores);
+			return true;
+		}
+	}
+	return false;
+}
+
+UInt8 ScoresFormHandleEvent(EventPtr e)
+{
 	if (e->eType == ctlSelectEvent)
 	{
 		if (e->data.ctlSelect.controlID == ButtonBack)
@@ -385,6 +448,18 @@ UInt8 GameOverFormHandleEvent(EventPtr e)
 		}
 	}
 	return false;
+}
+
+void RenderHighScores()
+{
+	UInt8 i;
+	Char scoreLine[31];
+	UInt8 scoreLineLength;
+	for (i = 0; i < highScores.numScores; i++)
+	{
+		scoreLineLength = StrPrintF(scoreLine, "%d: %s - %d", i + 1, highScores.scores[i].name, highScores.scores[i].score);
+		WinDrawChars(scoreLine, scoreLineLength, 20, 40 + i * 12);
+	}
 }
 
 UInt8 PlayFormHandleEvent(EventPtr e)
@@ -576,16 +651,25 @@ UInt32 PilotMain(UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags)
 					CtlSetLabel(scoreLabelPointer, StrIToA(scoreString, score));
 					FrmSetEventHandler(pfrm, GameOverFormHandleEvent);
 					break;
+				case FormScores:
+					SelectRecord(0);
+					FrmSetEventHandler(pfrm, ScoresFormHandleEvent);
+					break;
 				}
 				break;
 
 			case frmOpenEvent:
 				pfrm = FrmGetActiveForm();
 				FrmDrawForm(pfrm);
-				if (e.data.frmOpen.formID == FormPlay)
+				switch (e.data.frmOpen.formID)
 				{
+				case FormPlay:
 					SetUpGems();
 					RenderGems();
+					break;
+				case FormScores:
+					RenderHighScores();
+					break;
 				}
 				break;
 
