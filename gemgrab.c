@@ -259,7 +259,7 @@ void RenderGems()
 
 	WinEraseRectangle(&eraseRect, 0);
 
-	for (i = 0; i < NUM_GEMS; i++)
+	for (i = 0; i < numGems; i++)
 	{
 		int gemSize = gems[i].size / 10;
 		WinDrawBitmap(gemBitmaps[gemSize - 4], gems[i].x - gemSize / 2, gems[i].y - gemSize / 2);
@@ -343,6 +343,7 @@ void ResetGame()
 {
 	lastTicks = TimGetTicks();
 	time = STARTING_TIME + 3 * sysTicksPerSecond;
+	numGems = NUM_GEMS;
 	extending = false;
 	extendAmount = 0.0;
 	heldGemIndex = -1;
