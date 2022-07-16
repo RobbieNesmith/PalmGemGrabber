@@ -567,8 +567,7 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		}
 		break;
 	case penDownEvent:
-		// toggle extending if not extending
-		if (extendAmount == 0)
+		if (extendAmount == 0 && heldGemIndex == -1)
 		{
 			extendAmount = 1;
 			extending = true;
