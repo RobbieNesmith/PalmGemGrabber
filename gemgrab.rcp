@@ -75,6 +75,7 @@ SMALLICON "gemgrabsmall.bmp"
 BITMAPFAMILYEX ID BitmapTitle
 BEGIN
 BITMAP "title.bmp" BPP 1 DENSITY 1
+BITMAP "title_color.bmp" BPP 8 DENSITY 1
 END
 
 BITMAPFAMILYEX ID Countdown3
