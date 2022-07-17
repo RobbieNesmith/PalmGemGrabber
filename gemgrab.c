@@ -15,7 +15,6 @@
 
 #define QUARTER_PI 0.78540
 #define HALF_PI 1.57080
-#define PI 3.14159
 
 typedef struct GemType
 {
