@@ -483,7 +483,6 @@ void RenderHighScores()
 UInt8 PlayFormHandleEvent(EventPtr e)
 {
 	RectangleType rect;
-	RectangleType heldGemRect;
 	UInt8 i;
 	UInt32 curTicks = TimGetTicks();
 	double delta = (curTicks - lastTicks) / (sysTicksPerSecond * 1.0);
@@ -507,18 +506,7 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 	switch (e->eType)
 	{
 	case nilEvent:
-		rect.topLeft.x = swingX - 4;
-		rect.topLeft.y = swingY - 4;
-		WinEraseRectangle(&rect, 0);
 		DrawGemBuffer();
-		if (heldGemIndex > -1)
-		{
-			heldGemRect.extent.x = gems[heldGemIndex].size / 10;
-			heldGemRect.extent.y = gems[heldGemIndex].size / 10;
-			heldGemRect.topLeft.x = rect.topLeft.x + (8 - heldGemRect.extent.x) / 2;
-			heldGemRect.topLeft.y = rect.topLeft.y + 8;
-			WinEraseRectangle(&heldGemRect, 0);
-		}
 
 		StrIToA(timeString, time / sysTicksPerSecond);
 		StrIToA(scoreString, score);
@@ -588,7 +576,7 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		}
 		if (heldGemIndex > -1)
 		{
-			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], rect.topLeft.x + (8 - heldGemRect.extent.x) / 2, rect.topLeft.y + 8);
+			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], rect.topLeft.x + (8 - gems[heldGemIndex].size / 10) / 2, rect.topLeft.y + 8);
 		}
 
 		if (time > STARTING_TIME)
