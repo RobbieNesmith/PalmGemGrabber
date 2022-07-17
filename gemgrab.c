@@ -517,10 +517,13 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 {
 	UInt8 i;
 	UInt8 clawBitmapIndex;
+	UInt8 timeInSeconds;
+	UInt8 timeStringLen; // timeStringLength is defined as 9 in (PalmSDK)/include/Core/System/DateTime.h
+	UInt8 scoreStringLength;
 	UInt32 curTicks = TimGetTicks();
 	double delta = (curTicks - lastTicks) / (sysTicksPerSecond * 1.0);
-	Char timeString[3];
-	Char scoreString[5];
+	Char timeString[9];
+	Char scoreString[12];
 
 	if (time > curTicks - lastTicks)
 	{
@@ -538,11 +541,12 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 	case nilEvent:
 		DrawGemBuffer();
 
-		StrIToA(timeString, time / sysTicksPerSecond);
-		StrIToA(scoreString, score);
+		timeInSeconds = time / sysTicksPerSecond;
+		timeStringLen = StrPrintF(timeString, "Time: %d", timeInSeconds);
+		scoreStringLength = StrPrintF(scoreString, "Score: %d", score);
 
-		WinDrawChars(timeString, StrLen(timeString), 0, 0);
-		WinDrawChars(scoreString, StrLen(scoreString), 140, 0);
+		WinDrawChars(timeString, timeStringLen, 0, 0);
+		WinDrawChars(scoreString, scoreStringLength, 110, 0);
 
 		if (extendAmount == 0)
 		{
