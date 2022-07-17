@@ -578,6 +578,14 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		rect.topLeft.y = swingY - 4;
 
 		WinDrawRectangle(&rect, 0);
+		if (extendAmount == 0)
+		{
+			WinDrawLine(80, 0, (swingX - 80) * 2 + 80, swingY * 2);
+		}
+		else
+		{
+			WinDrawLine(80, 0, swingX, swingY);
+		}
 		if (heldGemIndex > -1)
 		{
 			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], rect.topLeft.x + (8 - heldGemRect.extent.x) / 2, rect.topLeft.y + 8);
