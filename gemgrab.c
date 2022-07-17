@@ -61,6 +61,8 @@ Boolean gameOver = false;
 
 BitmapPtr gemBitmaps[5];
 BitmapPtr countdownBitmaps[3];
+BitmapPtr clawOpenBitmaps[5];
+BitmapPtr clawClosedBitmaps[5];
 
 WinHandle gemBuffer;
 
@@ -218,6 +220,18 @@ void SetUpBitmaps()
 	MemHandle gem7Handle = DmGetResource(bitmapRsc, Gem7);
 	MemHandle gem8Handle = DmGetResource(bitmapRsc, Gem8);
 
+	MemHandle clawClosed1Handle = DmGetResource(bitmapRsc, ClawClosed1);
+	MemHandle clawClosed2Handle = DmGetResource(bitmapRsc, ClawClosed2);
+	MemHandle clawClosed3Handle = DmGetResource(bitmapRsc, ClawClosed3);
+	MemHandle clawClosed4Handle = DmGetResource(bitmapRsc, ClawClosed4);
+	MemHandle clawClosed5Handle = DmGetResource(bitmapRsc, ClawClosed5);
+
+	MemHandle clawOpen1Handle = DmGetResource(bitmapRsc, ClawOpen1);
+	MemHandle clawOpen2Handle = DmGetResource(bitmapRsc, ClawOpen2);
+	MemHandle clawOpen3Handle = DmGetResource(bitmapRsc, ClawOpen3);
+	MemHandle clawOpen4Handle = DmGetResource(bitmapRsc, ClawOpen4);
+	MemHandle clawOpen5Handle = DmGetResource(bitmapRsc, ClawOpen5);
+
 	countdownBitmaps[0] = MemHandleLock(countdown1Handle);
 	countdownBitmaps[1] = MemHandleLock(countdown2Handle);
 	countdownBitmaps[2] = MemHandleLock(countdown3Handle);
@@ -227,6 +241,18 @@ void SetUpBitmaps()
 	gemBitmaps[2] = MemHandleLock(gem6Handle);
 	gemBitmaps[3] = MemHandleLock(gem7Handle);
 	gemBitmaps[4] = MemHandleLock(gem8Handle);
+
+	clawClosedBitmaps[0] = MemHandleLock(clawClosed1Handle);
+	clawClosedBitmaps[1] = MemHandleLock(clawClosed2Handle);
+	clawClosedBitmaps[2] = MemHandleLock(clawClosed3Handle);
+	clawClosedBitmaps[3] = MemHandleLock(clawClosed4Handle);
+	clawClosedBitmaps[4] = MemHandleLock(clawClosed5Handle);
+
+	clawOpenBitmaps[0] = MemHandleLock(clawOpen1Handle);
+	clawOpenBitmaps[1] = MemHandleLock(clawOpen2Handle);
+	clawOpenBitmaps[2] = MemHandleLock(clawOpen3Handle);
+	clawOpenBitmaps[3] = MemHandleLock(clawOpen4Handle);
+	clawOpenBitmaps[4] = MemHandleLock(clawOpen5Handle);
 }
 
 void TearDownBitmaps()
@@ -244,6 +270,14 @@ void TearDownBitmaps()
 	for (i = 0; i < 5; i++)
 	{
 		handle = MemPtrRecoverHandle(gemBitmaps[i]);
+		MemHandleUnlock(handle);
+		DmReleaseResource(handle);
+
+		handle = MemPtrRecoverHandle(clawClosedBitmaps[i]);
+		MemHandleUnlock(handle);
+		DmReleaseResource(handle);
+
+		handle = MemPtrRecoverHandle(clawOpenBitmaps[i]);
 		MemHandleUnlock(handle);
 		DmReleaseResource(handle);
 	}
@@ -481,8 +515,8 @@ void RenderHighScores()
 
 UInt8 PlayFormHandleEvent(EventPtr e)
 {
-	RectangleType rect;
 	UInt8 i;
+	UInt8 clawBitmapIndex;
 	UInt32 curTicks = TimGetTicks();
 	double delta = (curTicks - lastTicks) / (sysTicksPerSecond * 1.0);
 	Char timeString[3];
@@ -497,9 +531,6 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		time = 0;
 	}
 	lastTicks = curTicks;
-
-	rect.extent.x = 8;
-	rect.extent.y = 8;
 
 	startDrawOffscreen();
 	switch (e->eType)
@@ -561,10 +592,9 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		}
 		swingX = floor((16.0 + extendAmount) * cos(swingPosition)) + 80;
 		swingY = floor((16.0 + extendAmount) * sin(swingPosition));
-		rect.topLeft.x = swingX - 4;
-		rect.topLeft.y = swingY - 4;
 
-		WinDrawRectangle(&rect, 0);
+		clawBitmapIndex = (swingPosition - QUARTER_PI) / HALF_PI * 5;
+
 		if (extendAmount == 0)
 		{
 			WinDrawLine(80, 0, (swingX - 80) * 2 + 80, swingY * 2);
@@ -575,7 +605,12 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 		}
 		if (heldGemIndex > -1)
 		{
-			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], rect.topLeft.x + (8 - gems[heldGemIndex].size / 10) / 2, rect.topLeft.y + 8);
+			WinDrawBitmap(clawClosedBitmaps[clawBitmapIndex], swingX - 4, swingY - 4);
+			WinDrawBitmap(gemBitmaps[gems[heldGemIndex].size / 10 - 4], swingX + (4 - gems[heldGemIndex].size / 10) / 2, swingY + 4);
+		}
+		else
+		{
+			WinDrawBitmap(clawOpenBitmaps[clawBitmapIndex], swingX - 4, swingY - 4);
 		}
 
 		if (time > STARTING_TIME)
