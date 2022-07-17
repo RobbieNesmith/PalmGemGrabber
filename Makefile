@@ -7,7 +7,7 @@ RSCS = gemgrab.h gemgrab.bmp gemgrabsmall.bmp
 SRCS = gemgrab.c MathLib.c
 OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(SRCS)))
 TARGET = GemGrabber
-APPNAME = 'Gem Grabber'
+APPNAME = 'Gem Grab'
 
 all: $(TARGET).prc
 
