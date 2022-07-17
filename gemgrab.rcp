@@ -64,7 +64,11 @@ STRING Help1 "This is the mobile version of the programming classics \"Hello Wor
 	"mobile.eric-poncet.com\n"\
 	"Freeware"
 
-ICON "gemgrab.bmp"
+ICONFAMILYEX
+BEGIN
+BITMAP "gemgrab.bmp" BPP 1 DENSITY 1
+BITMAP "gemgrab_color.bmp" BPP 8 DENSITY 1 TRANSPARENCY 255 0 0
+END
 
 SMALLICON "gemgrabsmall.bmp"
 
