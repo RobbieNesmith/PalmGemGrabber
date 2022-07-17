@@ -507,10 +507,10 @@ UInt8 PlayFormHandleEvent(EventPtr e)
 	switch (e->eType)
 	{
 	case nilEvent:
-		DrawGemBuffer();
 		rect.topLeft.x = swingX - 4;
 		rect.topLeft.y = swingY - 4;
 		WinEraseRectangle(&rect, 0);
+		DrawGemBuffer();
 		if (heldGemIndex > -1)
 		{
 			heldGemRect.extent.x = gems[heldGemIndex].size / 10;
