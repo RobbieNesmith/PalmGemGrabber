@@ -1,11 +1,12 @@
 CC = m68k-palmos-gcc
 CFLAGS = -O2 -Wall -I./inc
 CREATOR = rngg
-RCP = gemgrab.rcp
-RSC = .
-RSCS = gemgrab.h gemgrab.bmp gemgrabsmall.bmp
-SRCS = gemgrab.c MathLib.c
-OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(SRCS)))
+RCP = rsc/gemgrab.rcp
+RSC = ./rsc
+RSCS = src/gemgrab.h rsc/gemgrab.bmp rsc/gemgrabsmall.bmp
+SRC = src/
+SRCS = src/gemgrab.c src/MathLib.c
+OBJS = $(notdir $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(SRCS))))
 TARGET = GemGrabber
 APPNAME = 'Gem Grab'
 
@@ -17,7 +18,7 @@ $(TARGET).prc: $(TARGET) bin.stamp
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-%.o: %.c Makefile
+%.o: $(SRC)/%.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 bin.stamp: $(RCP) $(RSCS)

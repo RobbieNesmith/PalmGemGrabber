@@ -1,4 +1,4 @@
-#include "gemgrab.h"
+#include "../src/gemgrab.h"
 
 FORM ID FormMenu AT (0 0 160 160)
 USABLE
